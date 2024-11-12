@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -69,6 +69,14 @@
         .small-led.active {
             background-color: var(--led-red);
             box-shadow: 0 0 10px var(--led-red);
+        }
+
+        #half-beat-led {
+            grid-column: 6;
+        }
+
+        #end-beat-led {
+            grid-column: 8;
         }
 
         .bpm-controls {
@@ -167,6 +175,86 @@
             border: 1px solid #444;
             cursor: pointer;
         }
+        .beat-toggles {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .beat-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* 기본 체크박스 숨기기 */
+        .beat-toggle input[type="checkbox"] {
+            display: none;
+        }
+
+        /* 커스텀 체크박스 */
+        .beat-toggle .toggle-label {
+            position: relative;
+            padding-left: 35px;
+            font-size: 1rem;
+            user-select: none;
+        }
+
+        /* 체크박스 기본 스타일 */
+        .beat-toggle .toggle-label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background-color: var(--button-color);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        /* 체크 표시 */
+        .beat-toggle .toggle-label::after {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform-origin: center;
+            transform: translateY(-65%) rotate(45deg) scale(0);
+            transition: all 0.2s;
+        }
+
+        /* 체크됐을 때 배경 */
+        .beat-toggle input[type="checkbox"]:checked + .toggle-label::before {
+            background-color: var(--led-green);
+        }
+
+        /* 체크됐을 때 체크표시 */
+        .beat-toggle input[type="checkbox"]:checked + .toggle-label::after {
+            transform: translateY(-65%) rotate(45deg) scale(1);
+        }
+
+        /* 호버 효과 */
+        .beat-toggle .toggle-label:hover::before {
+            background-color: var(--button-hover);
+        }
+
+        .beat-toggle input[type="checkbox"]:checked + .toggle-label:hover::before {
+            background-color: #3b8a3e;
+        }
+
+        .toggle-label {
+            font-size: 1rem;
+        }
 
         .toggle-button {
             padding: 1rem 3rem;
@@ -208,7 +296,8 @@
 </head>
 <body>
     <div class="led-grid">
-        <div class="small-led"></div>
+        <div class="small-led" id="half-beat-led"></div>
+        <div class="small-led" id="end-beat-led"></div>
         <div class="led" style="grid-column: 1"></div>
         <div class="led" style="grid-column: 3"></div>
         <div class="led" style="grid-column: 5"></div>
@@ -227,6 +316,17 @@
             <button class="bpm-button">+</button>
         </div>
     </div>
+
+    <div class="beat-toggles">
+        <label class="beat-toggle">
+            <input type="checkbox" id="halfBeatToggle" checked>
+            <span class="toggle-label">3½ 박</span>
+        </label>
+        <label class="beat-toggle">
+            <input type="checkbox" id="endBeatToggle" checked>
+            <span class="toggle-label">4½ 박</span>
+        </label>
+    </div>
     
     <button class="toggle-button">시작</button>
 
@@ -235,6 +335,8 @@
         let bpm = 120;
         let step = 0;
         let interval;
+        let playHalfBeat = true;
+        let playEndBeat = true;
 
         // Tone.js 신디사이저 설정
         const highSynth = new Tone.Synth({
@@ -269,6 +371,8 @@
         const bpmIncreaseBtn = document.querySelector('.bpm-button:last-child');
         const leds = document.querySelectorAll('.led');
         const smallLed = document.querySelector('.small-led');
+        const halfBeatToggle = document.getElementById('halfBeatToggle');
+        const endBeatToggle = document.getElementById('endBeatToggle');
 
         // BPM 업데이트 함수
         function updateBPM(newBPM) {
@@ -283,32 +387,37 @@
         // LED 업데이트
         function updateLEDs(currentStep) {
             leds.forEach(led => led.classList.remove('active'));
-            smallLed.classList.remove('active');
+            document.getElementById('half-beat-led').classList.remove('active');
+            document.getElementById('end-beat-led').classList.remove('active');
 
             if (currentStep < 8) {
                 const ledIndex = Math.floor(currentStep / 2);
                 if (currentStep % 2 === 0) {
                     leds[ledIndex]?.classList.add('active');
-                } else if (currentStep === 5) {
-                    smallLed.classList.add('active');
+                } else if (currentStep === 5 && playHalfBeat) {
+                    document.getElementById('half-beat-led').classList.add('active');
+                } else if (currentStep === 7 && playEndBeat) {
+                    document.getElementById('end-beat-led').classList.add('active');
                 }
             }
         }
 
         // 메트로놈 틱 함수
         function tick() {
-            // 4분음표를 기준으로 계산 (step이 0~7까지 8단계)
-            // 0 = 첫박
-            // 2 = 2박
-            // 4 = 3박
-            // 6 = 4박
-            const isHighTick = step === 0 || step === 5;
-            const shouldTick = step === 0 || step === 2 || step === 4 || step === 6 || step === 5;
+            const isHighTick = step === 0 || 
+                            (step === 5 && playHalfBeat) || 
+                            (step === 7 && playEndBeat);
+            const shouldTick = step === 0 || 
+                            step === 2 || 
+                            step === 4 || 
+                            step === 6 || 
+                            (step === 5 && playHalfBeat) ||
+                            (step === 7 && playEndBeat);
             
             if (shouldTick) {
                 const synth = isHighTick ? highSynth : lowSynth;
-                const note = isHighTick ? "E6" : "A5"; // 음높이를 더 높게 조정
-                synth.triggerAttackRelease(note, "32n", undefined, 0.5); // 볼륨을 0.4로 조정
+                const note = isHighTick ? "E6" : "A5";
+                synth.triggerAttackRelease(note, "32n", undefined, 0.4);
             }
             
             updateLEDs(step);
@@ -339,6 +448,14 @@
         }
 
         // 이벤트 리스너 설정
+        halfBeatToggle.addEventListener('change', (e) => {
+            playHalfBeat = e.target.checked;
+        });
+
+        endBeatToggle.addEventListener('change', (e) => {
+            playEndBeat = e.target.checked;
+        });
+
         toggleButton.addEventListener('click', toggleMetronome);
         
         bpmInput.addEventListener('change', (e) => {
