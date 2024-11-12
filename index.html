@@ -322,14 +322,23 @@
             interval = setInterval(tick, intervalTime);
         }
 
+        async function initAudio() {
+            await Tone.start();
+            console.log('audio is ready');
+        }
+
         // 메트로놈 토글
-        function toggleMetronome() {
+        async function toggleMetronome() {
+            if (Tone.context.state !== 'running') {
+                await initAudio();
+            }
+
             isPlaying = !isPlaying;
             toggleButton.textContent = isPlaying ? "정지" : "시작";
             
             if (isPlaying) {
                 step = 0;
-                Tone.start();
+                // Tone.start();
                 restartMetronome();
             } else {
                 clearInterval(interval);
@@ -355,6 +364,21 @@
 
         bpmIncreaseBtn.addEventListener('click', () => {
             updateBPM(parseInt(bpm) + 1);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // iOS 디바이스 체크
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            
+            if (isIOS) {
+                toggleButton.addEventListener('click', function() {
+                    // 첫 클릭 시에만 실행
+                    if (Tone.context.state !== 'running') {
+                        // 필요한 경우 여기에 사용자에게 알림을 표시할 수 있습니다.
+                        console.log('iOS audio context initialized');
+                    }
+                });
+            }
         });
     </script>
 </body>
