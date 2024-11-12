@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메트로놈</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        :root {
+            --led-green: #45a049;
+            --led-red: #ff4444;
+            --bg-dark: #1a1a1a;
+            --bg-darker: #141414;
+            --button-color: #2c2c2c;
+            --button-hover: #3c3c3c;
+            height: 100dvh;
+        }
+
+        body {
+            margin: 0;
+            /* padding: 20px; */
+            height: 100%;
+            background-color: var(--bg-dark);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .led-grid {
+            display: grid;
+            grid-template-columns: 3fr 1fr 3fr 1fr 3fr 1fr 3fr;
+            grid-template-rows: auto auto;
+            gap: 0;
+            width: 70%;
+            max-width: 400px;
+            /* margin-top: 4rem; */
+            margin-bottom: 4rem;
+        }
+
+        .led {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--bg-dark);
+            border: 2px solid var(--led-green);
+            justify-self: center;
+            grid-row: 2;
+        }
+
+        .led.active {
+            background-color: var(--led-green);
+            box-shadow: 0 0 10px var(--led-green);
+        }
+
+        .small-led {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: var(--bg-dark);
+            border: 2px solid var(--led-red);
+            justify-self: center;
+            align-self: center;
+            grid-row: 1;
+            grid-column: 6;
+        }
+
+        .small-led.active {
+            background-color: var(--led-red);
+            box-shadow: 0 0 10px var(--led-red);
+        }
+
+        .bpm-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 90%;
+            max-width: 300px;
+            margin-bottom: 3rem;
+        }
+
+        .bpm-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bpm-value {
+            color: white;
+            font-size: 2rem;
+            width: 80px;
+            background: transparent;
+            border: none;
+            text-align: right;
+            padding: 0;
+            color: white;
+        }
+
+        .bpm-label {
+            color: white;
+            font-size: 2rem;
+        }
+
+        .bpm-adjust {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bpm-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            background-color: var(--button-color);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bpm-button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .bpm-slider {
+            width: 100%;
+            margin: 1rem 0;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        .bpm-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .bpm-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--button-color);
+            margin-top: -8px;
+            cursor: pointer;
+            border: 1px solid #444;
+        }
+
+        .bpm-slider::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .bpm-slider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--button-color);
+            border: 1px solid #444;
+            cursor: pointer;
+        }
+
+        .toggle-button {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 25px;
+            background-color: var(--button-color);
+            color: white;
+            cursor: pointer;
+            min-width: 150px;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .bpm-value::-webkit-inner-spin-button, 
+        .bpm-value::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .bpm-value {
+            -moz-appearance: textfield;
+        }
+
+        @media (max-width: 480px) {
+            .led {
+                width: 25px;
+                height: 25px;
+            }
+
+            .small-led {
+                width: 12px;
+                height: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="led-grid">
+        <div class="small-led"></div>
+        <div class="led" style="grid-column: 1"></div>
+        <div class="led" style="grid-column: 3"></div>
+        <div class="led" style="grid-column: 5"></div>
+        <div class="led" style="grid-column: 7"></div>
+    </div>
+    
+    <div class="bpm-controls">
+        <div class="bpm-display">
+            <input type="number" class="bpm-value" value="120" min="40" max="208">
+            <span class="bpm-label">BPM</span>
+        </div>
+        
+        <div class="bpm-adjust">
+            <button class="bpm-button">-</button>
+            <input type="range" class="bpm-slider" min="40" max="208" value="120" step="1">
+            <button class="bpm-button">+</button>
+        </div>
+    </div>
+    
+    <button class="toggle-button">시작</button>
+
+    <script>
+        let isPlaying = false;
+        let bpm = 120;
+        let step = 0;
+        let interval;
+
+        // Tone.js 신디사이저 설정
+        const highSynth = new Tone.Synth({
+            oscillator: {
+                type: "triangle"
+            },
+            envelope: {
+                attack: 0.001,
+                decay: 0.03,
+                sustain: 0,
+                release: 0.01
+            }
+        }).toDestination();
+
+        const lowSynth = new Tone.Synth({
+            oscillator: {
+                type: "triangle"
+            },
+            envelope: {
+                attack: 0.001,
+                decay: 0.03,
+                sustain: 0,
+                release: 0.01
+            }
+        }).toDestination();
+
+        // DOM 요소 가져오기
+        const toggleButton = document.querySelector('.toggle-button');
+        const bpmInput = document.querySelector('.bpm-value');
+        const bpmSlider = document.querySelector('.bpm-slider');
+        const bpmDecreaseBtn = document.querySelector('.bpm-button:first-child');
+        const bpmIncreaseBtn = document.querySelector('.bpm-button:last-child');
+        const leds = document.querySelectorAll('.led');
+        const smallLed = document.querySelector('.small-led');
+
+        // BPM 업데이트 함수
+        function updateBPM(newBPM) {
+            bpm = Math.min(Math.max(newBPM, 40), 208);
+            bpmInput.value = bpm;
+            bpmSlider.value = bpm;
+            if (isPlaying) {
+                restartMetronome();
+            }
+        }
+
+        // LED 업데이트
+        function updateLEDs(currentStep) {
+            leds.forEach(led => led.classList.remove('active'));
+            smallLed.classList.remove('active');
+
+            if (currentStep < 8) {
+                const ledIndex = Math.floor(currentStep / 2);
+                if (currentStep % 2 === 0) {
+                    leds[ledIndex]?.classList.add('active');
+                } else if (currentStep === 5) {
+                    smallLed.classList.add('active');
+                }
+            }
+        }
+
+        // 메트로놈 틱 함수
+        function tick() {
+            // 4분음표를 기준으로 계산 (step이 0~7까지 8단계)
+            // 0 = 첫박
+            // 3 = 2박
+            // 5 = 3박 (높은 음)
+            // 7 = 4박
+            const isHighTick = step === 0 || step === 5;
+            const shouldTick = step === 0 || step === 2 || step === 4 || step === 6 || step === 5;
+            
+            if (shouldTick) {
+                const synth = isHighTick ? highSynth : lowSynth;
+                const note = isHighTick ? "E6" : "A5"; // 음높이를 더 높게 조정
+                synth.triggerAttackRelease(note, "32n", undefined, 0.5); // 볼륨을 0.4로 조정
+            }
+            
+            updateLEDs(step);
+            step = (step + 1) % 8;
+        }
+
+        // 메트로놈 시작/재시작
+        function restartMetronome() {
+            if (interval) clearInterval(interval);
+            const intervalTime = (60 / bpm) * 1000 / 2; // 8분음표 간격
+            interval = setInterval(tick, intervalTime);
+        }
+
+        // 메트로놈 토글
+        function toggleMetronome() {
+            isPlaying = !isPlaying;
+            toggleButton.textContent = isPlaying ? "정지" : "시작";
+            
+            if (isPlaying) {
+                step = 0;
+                Tone.start();
+                restartMetronome();
+            } else {
+                clearInterval(interval);
+                leds.forEach(led => led.classList.remove('active'));
+                smallLed.classList.remove('active');
+            }
+        }
+
+        // 이벤트 리스너 설정
+        toggleButton.addEventListener('click', toggleMetronome);
+        
+        bpmInput.addEventListener('change', (e) => {
+            updateBPM(parseInt(e.target.value));
+        });
+
+        bpmSlider.addEventListener('input', (e) => {
+            updateBPM(parseInt(e.target.value));
+        });
+
+        bpmDecreaseBtn.addEventListener('click', () => {
+            updateBPM(parseInt(bpm) - 1);
+        });
+
+        bpmIncreaseBtn.addEventListener('click', () => {
+            updateBPM(parseInt(bpm) + 1);
+        });
+    </script>
+</body>
+</html>
