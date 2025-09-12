@@ -41,13 +41,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0px;
+    gap: 2px;
     width: 80%;
-    height: 50px;
+    height: 70px;
     border: 1px solid #444;
     border-radius: 3px;
     background-color: #222;
-    padding: 4px 2px;
+    padding: 6px 2px;
     justify-content: space-between;
     min-width: 0;
     max-width: none;
@@ -187,6 +187,31 @@ body {
 
 .toggle-button:hover {
     background-color: var(--button-hover);
+}
+
+.control-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.red-toggle {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 15px;
+    background-color: var(--led-red);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.red-toggle.disabled {
+    background-color: #666;
+}
+
+.red-toggle:hover {
+    opacity: 0.8;
 }
 
 .bpm-value::-webkit-inner-spin-button, 
@@ -331,24 +356,28 @@ body {
     
     <div class="bpm-controls">
         <div class="bpm-display">
-            <input type="number" class="bpm-value" value="110" min="40" max="208">
+            <input type="number" class="bpm-value" value="60" min="30" max="200">
             <span class="bpm-label">BPM</span>
         </div>
         
         <div class="bpm-adjust">
             <button class="bpm-button">-</button>
-            <input type="range" class="bpm-slider" min="40" max="208" value="110" step="1">
+            <input type="range" class="bpm-slider" min="30" max="200" value="60" step="1">
             <button class="bpm-button">+</button>
         </div>
     </div>
     
-    <button class="toggle-button">시작</button>
+    <div class="control-buttons">
+        <button class="red-toggle" id="red-toggle">빨간음 ON</button>
+        <button class="toggle-button">시작</button>
+    </div>
 
     <script>
         let isPlaying = false;
-        let bpm = 110;
+        let bpm = 60;
         let step = 0;
         let interval;
+        let redSoundEnabled = true;
 
         // 16비트에서 빨간점이 켜질 위치 (0,3,6,9,12,14)
         const redBeatPositions = [0, 3, 6, 9, 12, 14]; 
@@ -394,6 +423,7 @@ body {
 
         // DOM 요소 가져오기
         const toggleButton = document.querySelector('.toggle-button');
+        const redToggleButton = document.getElementById('red-toggle');
         const bpmInput = document.querySelector('.bpm-value');
         const bpmSlider = document.querySelector('.bpm-slider');
         const bpmDecreaseBtn = document.querySelector('.bpm-button:first-child');
@@ -401,12 +431,19 @@ body {
 
         // BPM 업데이트 함수
         function updateBPM(newBPM) {
-            bpm = Math.min(Math.max(newBPM, 40), 208);
+            bpm = Math.min(Math.max(newBPM, 30), 200);
             bpmInput.value = bpm;
             bpmSlider.value = bpm;
             if (isPlaying) {
                 restartMetronome();
             }
+        }
+
+        // 빨간음 토글 함수
+        function toggleRedSound() {
+            redSoundEnabled = !redSoundEnabled;
+            redToggleButton.textContent = redSoundEnabled ? "빨간음 ON" : "빨간음 OFF";
+            redToggleButton.classList.toggle('disabled', !redSoundEnabled);
         }
 
         // LED 업데이트
@@ -450,12 +487,12 @@ body {
             if (isMainBeat) {
                 const synth = isHighTick ? highSynth : lowSynth;
                 const note = isHighTick ? "E6" : "A5";
-                synth.triggerAttackRelease(note, "32n", undefined, 0.4);
+                synth.triggerAttackRelease(note, "32n", undefined, 0.8);
             }
             
-            // 빨간점 소리
-            if (isRedBeat) {
-                redSynth.triggerAttackRelease("C6", "32n", undefined, 0.3);
+            // 빨간점 소리 (토글 설정에 따라)
+            if (isRedBeat && redSoundEnabled) {
+                redSynth.triggerAttackRelease("C6", "32n", undefined, 0.6);
             }
             
             updateLEDs(step);
@@ -474,8 +511,8 @@ body {
             isPlaying = !isPlaying;
             toggleButton.textContent = isPlaying ? "정지" : "시작";
             
+            step = 0;
             if (isPlaying) {
-                step = 0;
                 Tone.start();
                 restartMetronome();
             } else {
@@ -488,6 +525,7 @@ body {
 
         // 이벤트 리스너 설정
         toggleButton.addEventListener('click', toggleMetronome);
+        redToggleButton.addEventListener('click', toggleRedSound);
         
         bpmInput.addEventListener('change', (e) => {
             updateBPM(parseInt(e.target.value));
