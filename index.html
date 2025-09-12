@@ -7,301 +7,326 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <style>
         :root {
-            --led-green: #45a049;
-            --led-red: #ff4444;
-            --bg-dark: #1a1a1a;
-            --bg-darker: #141414;
-            --button-color: #2c2c2c;
-            --button-hover: #3c3c3c;
-            height: 100dvh;
-        }
+    --led-green: #45a049;
+    --led-red: #ff4444;
+    --bg-dark: #1a1a1a;
+    --bg-darker: #141414;
+    --button-color: #2c2c2c;
+    --button-hover: #3c3c3c;
+    height: 100dvh;
+}
 
-        body {
-            margin: 0;
-            /* padding: 20px; */
-            height: 100%;
-            background-color: var(--bg-dark);
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+body {
+    margin: 0;
+    height: 100%;
+    background-color: var(--bg-dark);
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-        .led-grid {
-            display: grid;
-            grid-template-columns: 3fr 1fr 3fr 1fr 3fr 1fr 3fr;
-            grid-template-rows: auto auto;
-            gap: 0;
-            width: 70%;
-            max-width: 400px;
-            /* margin-top: 4rem; */
-            margin-bottom: 4rem;
-        }
+.metronome-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 1px;
+    width: 90%;
+    margin-bottom: 2rem;
+    justify-items: center;
+}
 
-        .led {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: var(--bg-dark);
-            border: 2px solid var(--led-green);
-            justify-self: center;
-            grid-row: 2;
-        }
+.beat-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+    width: 80%;
+    height: 50px;
+    border: 1px solid #444;
+    border-radius: 3px;
+    background-color: #222;
+    padding: 4px 2px;
+    justify-content: space-between;
+    min-width: 0;
+    max-width: none;
+}
 
-        .led.active {
-            background-color: var(--led-green);
-            box-shadow: 0 0 10px var(--led-green);
-        }
+.red-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--led-red);
+    min-width: 0;
+}
 
-        .small-led {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background-color: var(--bg-dark);
-            border: 2px solid var(--led-red);
-            justify-self: center;
-            align-self: center;
-            grid-row: 1;
-            grid-column: 6;
-        }
+.red-led.active {
+    background-color: var(--led-red);
+    box-shadow: 0 0 6px var(--led-red);
+}
 
-        .small-led.active {
-            background-color: var(--led-red);
-            box-shadow: 0 0 10px var(--led-red);
-        }
+.green-led {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--led-green);
+    min-width: 0;
+}
 
-        #half-beat-led {
-            grid-column: 6;
-        }
+.green-led.active {
+    background-color: var(--led-green);
+    box-shadow: 0 0 6px var(--led-green);
+}
 
-        #end-beat-led {
-            grid-column: 8;
-        }
+.empty-space {
+    width: 8px;
+    height: 8px;
+}
 
-        .bpm-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            width: 90%;
-            max-width: 300px;
-            margin-bottom: 3rem;
-        }
+.empty-green {
+    width: 12px;
+    height: 12px;
+}
 
-        .bpm-display {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.bpm-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 90%;
+    margin-bottom: 2rem;
+}
 
-        .bpm-value {
-            color: white;
-            font-size: 2rem;
-            width: 80px;
-            background: transparent;
-            border: none;
-            text-align: right;
-            padding: 0;
-            color: white;
-        }
+.bpm-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    width: 100%;
+}
 
-        .bpm-label {
-            color: white;
-            font-size: 2rem;
-        }
+.bpm-value {
+    color: white;
+    font-size: 1.8rem;
+    width: 70px;
+    background: transparent;
+    border: none;
+    text-align: center;
+    padding: 0;
+}
 
-        .bpm-adjust {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.bpm-label {
+    color: white;
+    font-size: 1.8rem;
+}
 
-        .bpm-button {
-            width: 40px;
-            height: 40px;
-            border-radius: 20px;
-            border: none;
-            background-color: var(--button-color);
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.bpm-adjust {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
 
-        .bpm-button:hover {
-            background-color: var(--button-hover);
-        }
+.bpm-button {
+    width: 35px;
+    height: 35px;
+    border-radius: 17px;
+    border: none;
+    background-color: var(--button-color);
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .bpm-slider {
-            width: 100%;
-            margin: 1rem 0;
-            -webkit-appearance: none;
-            background: transparent;
-        }
+.bpm-button:hover {
+    background-color: var(--button-hover);
+}
 
-        .bpm-slider::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-        }
+.bpm-slider {
+    width: 100%;
+    margin: 0 1rem;
+    -webkit-appearance: none;
+    background: transparent;
+}
 
-        .bpm-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: var(--button-color);
-            margin-top: -8px;
-            cursor: pointer;
-            border: 1px solid #444;
-        }
+.bpm-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+}
 
-        .bpm-slider::-moz-range-track {
-            width: 100%;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-        }
+.bpm-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: var(--button-color);
+    margin-top: -7px;
+    cursor: pointer;
+    border: 1px solid #444;
+}
 
-        .bpm-slider::-moz-range-thumb {
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: var(--button-color);
-            border: 1px solid #444;
-            cursor: pointer;
-        }
-        .beat-toggles {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            justify-content: center;
-        }
+.toggle-button {
+    padding: 0.8rem 2.5rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 20px;
+    background-color: var(--button-color);
+    color: white;
+    cursor: pointer;
+    min-width: 120px;
+    transition: background-color 0.2s;
+}
 
-        .beat-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            color: white;
-            cursor: pointer;
-        }
+.toggle-button:hover {
+    background-color: var(--button-hover);
+}
 
-        /* 기본 체크박스 숨기기 */
-        .beat-toggle input[type="checkbox"] {
-            display: none;
-        }
+.bpm-value::-webkit-inner-spin-button, 
+.bpm-value::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
 
-        /* 커스텀 체크박스 */
-        .beat-toggle .toggle-label {
-            position: relative;
-            padding-left: 35px;
-            font-size: 1rem;
-            user-select: none;
-        }
+.bpm-value {
+    -moz-appearance: textfield;
+}
 
-        /* 체크박스 기본 스타일 */
-        .beat-toggle .toggle-label::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background-color: var(--button-color);
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
+.yellow-led {
+    width: 100%;
+    height: 6px;
+    background-color: #333;
+    border-radius: 3px;
+    border: 1px solid #666;
+    min-width: 0;
+}
 
-        /* 체크 표시 */
-        .beat-toggle .toggle-label::after {
-            content: '';
-            position: absolute;
-            left: 9px;
-            top: 50%;
-            transform: translateY(-50%) scale(0);
-            width: 6px;
-            height: 12px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform-origin: center;
-            transform: translateY(-65%) rotate(45deg) scale(0);
-            transition: all 0.2s;
-        }
-
-        /* 체크됐을 때 배경 */
-        .beat-toggle input[type="checkbox"]:checked + .toggle-label::before {
-            background-color: var(--led-green);
-        }
-
-        /* 체크됐을 때 체크표시 */
-        .beat-toggle input[type="checkbox"]:checked + .toggle-label::after {
-            transform: translateY(-65%) rotate(45deg) scale(1);
-        }
-
-        /* 호버 효과 */
-        .beat-toggle .toggle-label:hover::before {
-            background-color: var(--button-hover);
-        }
-
-        .beat-toggle input[type="checkbox"]:checked + .toggle-label:hover::before {
-            background-color: #3b8a3e;
-        }
-
-        .toggle-label {
-            font-size: 1rem;
-        }
-
-        .toggle-button {
-            padding: 1rem 3rem;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 25px;
-            background-color: var(--button-color);
-            color: white;
-            cursor: pointer;
-            min-width: 150px;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-button:hover {
-            background-color: var(--button-hover);
-        }
-
-        .bpm-value::-webkit-inner-spin-button, 
-        .bpm-value::-webkit-outer-spin-button { 
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .bpm-value {
-            -moz-appearance: textfield;
-        }
-
-        @media (max-width: 480px) {
-            .led {
-                width: 25px;
-                height: 25px;
-            }
-
-            .small-led {
-                width: 12px;
-                height: 12px;
-            }
-        }
+.yellow-led.active {
+    background-color: #ffd700;
+    box-shadow: 0 0 6px #ffd700;
+}
     </style>
 </head>
 <body>
-    <div class="led-grid">
-        <div class="small-led" id="half-beat-led"></div>
-        <div class="small-led" id="end-beat-led"></div>
-        <div class="led" style="grid-column: 1"></div>
-        <div class="led" style="grid-column: 3"></div>
-        <div class="led" style="grid-column: 5"></div>
-        <div class="led" style="grid-column: 7"></div>
+    <div class="metronome-grid">
+        <!-- 0번 칸: 빨간LED + 초록LED -->
+        <div class="beat-column">
+            <div class="red-led" id="red-0"></div>
+            <div class="green-led" id="green-0"></div>
+        </div>
+        
+        <!-- 1번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 2번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 3번 칸: 빨간LED -->
+        <div class="beat-column">
+            <div class="red-led" id="red-3"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 4번 칸: 초록LED -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="green-led" id="green-4"></div>
+        </div>
+        
+        <!-- 5번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 6번 칸: 빨간LED -->
+        <div class="beat-column">
+            <div class="red-led" id="red-6"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 7번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 8번 칸: 초록LED -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="green-led" id="green-8"></div>
+        </div>
+        
+        <!-- 9번 칸: 빨간LED -->
+        <div class="beat-column">
+            <div class="red-led" id="red-9"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 10번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 11번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 12번 칸: 빨간LED + 초록LED -->
+        <div class="beat-column">
+            <div class="red-led" id="red-12"></div>
+            <div class="green-led" id="green-12"></div>
+        </div>
+        
+        <!-- 13번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 14번 칸: 빨간LED -->
+        <div class="beat-column">
+            <div class="red-led" id="red-14"></div>
+            <div class="empty-green"></div>
+        </div>
+        
+        <!-- 15번 칸: 빈 칸 -->
+        <div class="beat-column">
+            <div class="empty-space"></div>
+            <div class="empty-green"></div>
+        </div>
+        <div class="yellow-led" id="yellow-0"></div>
+        <div class="yellow-led" id="yellow-1"></div>
+        <div class="yellow-led" id="yellow-2"></div>
+        <div class="yellow-led" id="yellow-3"></div>
+        <div class="yellow-led" id="yellow-4"></div>
+        <div class="yellow-led" id="yellow-5"></div>
+        <div class="yellow-led" id="yellow-6"></div>
+        <div class="yellow-led" id="yellow-7"></div>
+        <div class="yellow-led" id="yellow-8"></div>
+        <div class="yellow-led" id="yellow-9"></div>
+        <div class="yellow-led" id="yellow-10"></div>
+        <div class="yellow-led" id="yellow-11"></div>
+        <div class="yellow-led" id="yellow-12"></div>
+        <div class="yellow-led" id="yellow-13"></div>
+        <div class="yellow-led" id="yellow-14"></div>
+        <div class="yellow-led" id="yellow-15"></div>
     </div>
     
     <div class="bpm-controls">
@@ -312,31 +337,23 @@
         
         <div class="bpm-adjust">
             <button class="bpm-button">-</button>
-            <input type="range" class="bpm-slider" min="40" max="208" value="120" step="1">
+            <input type="range" class="bpm-slider" min="40" max="208" value="110" step="1">
             <button class="bpm-button">+</button>
         </div>
-    </div>
-
-    <div class="beat-toggles">
-        <label class="beat-toggle">
-            <input type="checkbox" id="halfBeatToggle" checked>
-            <span class="toggle-label">3½ 박</span>
-        </label>
-        <label class="beat-toggle">
-            <input type="checkbox" id="endBeatToggle">
-            <span class="toggle-label">4½ 박</span>
-        </label>
     </div>
     
     <button class="toggle-button">시작</button>
 
     <script>
         let isPlaying = false;
-        let bpm = 120;
+        let bpm = 110;
         let step = 0;
         let interval;
-        let playHalfBeat = true;
-        let playEndBeat = false;
+
+        // 16비트에서 빨간점이 켜질 위치 (0,3,6,9,12,14)
+        const redBeatPositions = [0, 3, 6, 9, 12, 14]; 
+        // 주박자 위치 (0,4,8,12)
+        const mainBeatPositions = [0, 4, 8, 12];
 
         // Tone.js 신디사이저 설정
         const highSynth = new Tone.Synth({
@@ -363,16 +380,24 @@
             }
         }).toDestination();
 
+        const redSynth = new Tone.Synth({
+            oscillator: {
+                type: "sine"
+            },
+            envelope: {
+                attack: 0.001,
+                decay: 0.02,
+                sustain: 0,
+                release: 0.01
+            }
+        }).toDestination();
+
         // DOM 요소 가져오기
         const toggleButton = document.querySelector('.toggle-button');
         const bpmInput = document.querySelector('.bpm-value');
         const bpmSlider = document.querySelector('.bpm-slider');
         const bpmDecreaseBtn = document.querySelector('.bpm-button:first-child');
         const bpmIncreaseBtn = document.querySelector('.bpm-button:last-child');
-        const leds = document.querySelectorAll('.led');
-        const smallLed = document.querySelector('.small-led');
-        const halfBeatToggle = document.getElementById('halfBeatToggle');
-        const endBeatToggle = document.getElementById('endBeatToggle');
 
         // BPM 업데이트 함수
         function updateBPM(newBPM) {
@@ -386,48 +411,61 @@
 
         // LED 업데이트
         function updateLEDs(currentStep) {
-            leds.forEach(led => led.classList.remove('active'));
-            document.getElementById('half-beat-led').classList.remove('active');
-            document.getElementById('end-beat-led').classList.remove('active');
+            // 모든 LED 끄기
+            document.querySelectorAll('.red-led, .green-led').forEach(led => {
+                led.classList.remove('active');
+            });
 
-            if (currentStep < 8) {
-                const ledIndex = Math.floor(currentStep / 2);
-                if (currentStep % 2 === 0) {
-                    leds[ledIndex]?.classList.add('active');
-                } else if (currentStep === 5 && playHalfBeat) {
-                    document.getElementById('half-beat-led').classList.add('active');
-                } else if (currentStep === 7 && playEndBeat) {
-                    document.getElementById('end-beat-led').classList.add('active');
+            // 현재 스텝에 해당하는 초록 LED 켜기
+            if (mainBeatPositions.includes(currentStep)) {
+                const greenLed = document.getElementById(`green-${currentStep}`);
+                if (greenLed) {
+                    greenLed.classList.add('active');
                 }
             }
+
+            // 빨간 LED 켜기
+            if (redBeatPositions.includes(currentStep)) {
+                const redLed = document.getElementById(`red-${currentStep}`);
+                if (redLed) {
+                    redLed.classList.add('active');
+                }
+            }
+
+            document.querySelectorAll('.yellow-led').forEach(led => {
+                led.classList.remove('active');
+            });
+            document.getElementById(`yellow-${currentStep}`).classList.add('active');
         }
 
         // 메트로놈 틱 함수
         function tick() {
-            const isHighTick = step === 0 || 
-                            (step === 5 && playHalfBeat) || 
-                            (step === 7 && playEndBeat);
-            const shouldTick = step === 0 || 
-                            step === 2 || 
-                            step === 4 || 
-                            step === 6 || 
-                            (step === 5 && playHalfBeat) ||
-                            (step === 7 && playEndBeat);
+            const isMainBeat = mainBeatPositions.includes(step);
+            const isRedBeat = redBeatPositions.includes(step);
             
-            if (shouldTick) {
+            // 첫 번째 박자는 높은 음
+            const isHighTick = step === 0;
+            
+            // 주박자 소리
+            if (isMainBeat) {
                 const synth = isHighTick ? highSynth : lowSynth;
                 const note = isHighTick ? "E6" : "A5";
                 synth.triggerAttackRelease(note, "32n", undefined, 0.4);
             }
             
+            // 빨간점 소리
+            if (isRedBeat) {
+                redSynth.triggerAttackRelease("C6", "32n", undefined, 0.3);
+            }
+            
             updateLEDs(step);
-            step = (step + 1) % 8;
+            step = (step + 1) % 16;
         }
 
         // 메트로놈 시작/재시작
         function restartMetronome() {
             if (interval) clearInterval(interval);
-            const intervalTime = (60 / bpm) * 1000 / 2; // 8분음표 간격
+            const intervalTime = (60 / bpm) * 1000 / 4; // 16분음표 간격
             interval = setInterval(tick, intervalTime);
         }
 
@@ -442,20 +480,13 @@
                 restartMetronome();
             } else {
                 clearInterval(interval);
-                leds.forEach(led => led.classList.remove('active'));
-                smallLed.classList.remove('active');
+                document.querySelectorAll('.red-led, .green-led').forEach(led => {
+                    led.classList.remove('active');
+                });
             }
         }
 
         // 이벤트 리스너 설정
-        halfBeatToggle.addEventListener('change', (e) => {
-            playHalfBeat = e.target.checked;
-        });
-
-        endBeatToggle.addEventListener('change', (e) => {
-            playEndBeat = e.target.checked;
-        });
-
         toggleButton.addEventListener('click', toggleMetronome);
         
         bpmInput.addEventListener('change', (e) => {
