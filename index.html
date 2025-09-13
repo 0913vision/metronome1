@@ -214,6 +214,26 @@ body {
     opacity: 0.8;
 }
 
+.main-toggle {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 15px;
+    background-color: var(--led-green);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.main-toggle.disabled {
+    background-color: #666;
+}
+
+.main-toggle:hover {
+    opacity: 0.8;
+}
+
+
 .bpm-value::-webkit-inner-spin-button, 
 .bpm-value::-webkit-outer-spin-button { 
     -webkit-appearance: none;
@@ -368,9 +388,11 @@ body {
     </div>
     
     <div class="control-buttons">
+        <button class="main-toggle" id="main-toggle">메인음 ON</button>
         <button class="red-toggle" id="red-toggle">빨간음 ON</button>
         <button class="toggle-button">시작</button>
     </div>
+    
 
     <script>
         let isPlaying = false;
@@ -378,6 +400,7 @@ body {
         let step = 0;
         let interval;
         let redSoundEnabled = true;
+        let mainSoundEnabled = true;
 
         // 16비트에서 빨간점이 켜질 위치 (0,3,6,9,12,14)
         const redBeatPositions = [0, 3, 6, 9, 12, 14]; 
@@ -424,6 +447,7 @@ body {
         // DOM 요소 가져오기
         const toggleButton = document.querySelector('.toggle-button');
         const redToggleButton = document.getElementById('red-toggle');
+        const mainToggleButton = document.getElementById('main-toggle');
         const bpmInput = document.querySelector('.bpm-value');
         const bpmSlider = document.querySelector('.bpm-slider');
         const bpmDecreaseBtn = document.querySelector('.bpm-button:first-child');
@@ -445,6 +469,13 @@ body {
             redToggleButton.textContent = redSoundEnabled ? "빨간음 ON" : "빨간음 OFF";
             redToggleButton.classList.toggle('disabled', !redSoundEnabled);
         }
+
+        function toggleMainSound() {
+            mainSoundEnabled = !mainSoundEnabled;
+            mainToggleButton.textContent = mainSoundEnabled ? "메인음 ON" : "메인음 OFF";
+            mainToggleButton.classList.toggle('disabled', !mainSoundEnabled);
+        }
+
 
         // LED 업데이트
         function updateLEDs(currentStep) {
@@ -484,7 +515,7 @@ body {
             const isHighTick = step === 0;
             
             // 주박자 소리
-            if (isMainBeat) {
+            if (isMainBeat && mainSoundEnabled) {
                 const synth = isHighTick ? highSynth : lowSynth;
                 const note = isHighTick ? "E6" : "A5";
                 synth.triggerAttackRelease(note, "32n", undefined, 0.8);
@@ -525,6 +556,7 @@ body {
 
         // 이벤트 리스너 설정
         toggleButton.addEventListener('click', toggleMetronome);
+        mainToggleButton.addEventListener('click', toggleMainSound);
         redToggleButton.addEventListener('click', toggleRedSound);
         
         bpmInput.addEventListener('change', (e) => {
