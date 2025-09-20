@@ -119,11 +119,10 @@ function updateLEDs(currentStep) {
     }
 
     // 빨간 LED 켜기
-    if (redBeatPositions.includes(currentStep)) {
+    const currentRedPositions = redBeatPositions; // 최신 배열
+    if (currentRedPositions.includes(currentStep)) {
         const redLed = document.getElementById(`red-${currentStep}`);
-        if (redLed) {
-            redLed.classList.add('active');
-        }
+        if (redLed) redLed.classList.add('active');
     }
 
     document.querySelectorAll('.yellow-led').forEach(led => {
