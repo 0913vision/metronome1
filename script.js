@@ -106,7 +106,7 @@ const redSynth = new Tone.Synth({
 
 // DOM 요소 가져오기
 const toggleButton = document.querySelector('.toggle-button');
-const redToggleBㅣㅣㅣㅣㅣㅣutton = document.getElementById('red-toggle');
+const redToggleButton = document.getElementById('red-toggle');
 const mainToggleButton = document.getElementById('main-toggle');
 const bpmInput = document.querySelector('.bpm-value');
 const bpmSlider = document.querySelector('.bpm-slider');
