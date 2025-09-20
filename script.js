@@ -24,7 +24,7 @@ function selectRhythm(rhythm) {
     redBeatPositions = redRhythms[rhythm];
     rhythm1Btn.classList.toggle('active', rhythm === 'rhythm1');
     rhythm2Btn.classList.toggle('active', rhythm === 'rhythm2');
-    renderRedLEDs(); // 버튼 클릭 시 빨간 LED 위치 업데이트
+    renderBeats(); // 버튼 클릭 시 빨간 LED 위치 업데이트
 
 }
 
