@@ -24,11 +24,30 @@ function selectRhythm(rhythm) {
     redBeatPositions = redRhythms[rhythm];
     rhythm1Btn.classList.toggle('active', rhythm === 'rhythm1');
     rhythm2Btn.classList.toggle('active', rhythm === 'rhythm2');
+    renderRedLEDs(); // 버튼 클릭 시 빨간 LED 위치 업데이트
+
 }
 
 // 이벤트 연결
 rhythm1Btn.addEventListener('click', () => selectRhythm('rhythm1'));
 rhythm2Btn.addEventListener('click', () => selectRhythm('rhythm2'));
+
+function renderRedLEDs() {
+    // 기존 빨간 LED 모두 제거
+    document.querySelectorAll('.red-led').forEach(led => led.remove());
+
+    // 선택된 리듬 배열에 따라 빨간 LED 새로 생성
+    redBeatPositions.forEach(step => {
+        const column = document.querySelectorAll('.beat-column')[step];
+        if (column) {
+            const redLed = document.createElement('div');
+            redLed.classList.add('red-led');
+            redLed.id = `red-${step}`;
+            column.prepend(redLed); // 초록 LED 위쪽에 추가
+        }
+    });
+}
+
 
 // 주박자 위치 (0,4,8,12)
 const mainBeatPositions = [0, 4, 8, 12];
