@@ -18,21 +18,6 @@ const redRhythms = {
 let currentRedRhythm = 'rhythm1';
 let redBeatPositions = redRhythms[currentRedRhythm];
 
-// 리듬 버튼 클릭 이벤트
-function selectRhythm(rhythm) {
-    currentRedRhythm = rhythm;
-    redBeatPositions = redRhythms[rhythm];
-    rhythm1Btn.classList.toggle('active', rhythm === 'rhythm1');
-    rhythm2Btn.classList.toggle('active', rhythm === 'rhythm2');
-    renderBeats(); // 버튼 클릭 시 빨간 LED 위치 업데이트
-
-}
-
-// 이벤트 연결
-rhythm1Btn.addEventListener('click', () => selectRhythm('rhythm1'));
-rhythm2Btn.addEventListener('click', () => selectRhythm('rhythm2'));
-
-// 주박자 위치 (0,4,8,12)
 const mainBeatPositions = [0, 4, 8, 12];
 
 function renderBeats() {
@@ -40,8 +25,8 @@ function renderBeats() {
 
     columns.forEach((col, idx) => {
         // 기존 내용 제거
-        col.querySelectorAll('.red-led, .green-led, .empty-space, .empty-green').forEach(el => el.remove());
-
+        col.innerHTML = '';
+        
         // 빨간 LED or empty
         if (redBeatPositions.includes(idx)) {
             const redLed = document.createElement('div');
@@ -67,6 +52,20 @@ function renderBeats() {
         }
     });
 }
+
+// 리듬 버튼 클릭 이벤트
+function selectRhythm(rhythm) {
+    currentRedRhythm = rhythm;
+    redBeatPositions = redRhythms[rhythm];
+    rhythm1Btn.classList.toggle('active', rhythm === 'rhythm1');
+    rhythm2Btn.classList.toggle('active', rhythm === 'rhythm2');
+    renderBeats(); // 버튼 클릭 시 빨간 LED 위치 업데이트
+
+}
+
+// 이벤트 연결
+rhythm1Btn.addEventListener('click', () => selectRhythm('rhythm1'));
+rhythm2Btn.addEventListener('click', () => selectRhythm('rhythm2'));
 
 // Tone.js 신디사이저 설정
 const highSynth = new Tone.Synth({
@@ -107,7 +106,7 @@ const redSynth = new Tone.Synth({
 
 // DOM 요소 가져오기
 const toggleButton = document.querySelector('.toggle-button');
-const redToggleButton = document.getElementById('red-toggle');
+const redToggleBㅣㅣㅣㅣㅣㅣutton = document.getElementById('red-toggle');
 const mainToggleButton = document.getElementById('main-toggle');
 const bpmInput = document.querySelector('.bpm-value');
 const bpmSlider = document.querySelector('.bpm-slider');
