@@ -20,6 +20,28 @@ body {
     justify-content: center;
 }
 
+.rhythm-select {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rhythm-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--button-color);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.rhythm-btn.active {
+    background-color: #ffd700;
+    color: black;
+}
+
 .metronome-grid {
     display: grid;
     grid-template-columns: repeat(16, 1fr);
