@@ -32,25 +32,41 @@ function selectRhythm(rhythm) {
 rhythm1Btn.addEventListener('click', () => selectRhythm('rhythm1'));
 rhythm2Btn.addEventListener('click', () => selectRhythm('rhythm2'));
 
-function renderRedLEDs() {
-    // 기존 빨간 LED 모두 제거
-    document.querySelectorAll('.red-led').forEach(led => led.remove());
+// 주박자 위치 (0,4,8,12)
+const mainBeatPositions = [0, 4, 8, 12];
 
-    // 선택된 리듬 배열에 따라 빨간 LED 새로 생성
-    redBeatPositions.forEach(step => {
-        const column = document.querySelectorAll('.beat-column')[step];
-        if (column) {
+function renderBeats() {
+    const columns = document.querySelectorAll('.beat-column');
+
+    columns.forEach((col, idx) => {
+        // 기존 내용 제거
+        col.querySelectorAll('.red-led, .green-led, .empty-space, .empty-green').forEach(el => el.remove());
+
+        // 빨간 LED or empty
+        if (redBeatPositions.includes(idx)) {
             const redLed = document.createElement('div');
             redLed.classList.add('red-led');
-            redLed.id = `red-${step}`;
-            column.prepend(redLed); // 초록 LED 위쪽에 추가
+            redLed.id = `red-${idx}`;
+            col.appendChild(redLed);
+        } else {
+            const emptyRed = document.createElement('div');
+            emptyRed.classList.add('empty-space');
+            col.appendChild(emptyRed);
+        }
+
+        // 초록 LED or empty
+        if (mainBeatPositions.includes(idx)) {
+            const greenLed = document.createElement('div');
+            greenLed.classList.add('green-led');
+            greenLed.id = `green-${idx}`;
+            col.appendChild(greenLed);
+        } else {
+            const emptyGreen = document.createElement('div');
+            emptyGreen.classList.add('empty-green');
+            col.appendChild(emptyGreen);
         }
     });
 }
-
-
-// 주박자 위치 (0,4,8,12)
-const mainBeatPositions = [0, 4, 8, 12];
 
 // Tone.js 신디사이저 설정
 const highSynth = new Tone.Synth({
